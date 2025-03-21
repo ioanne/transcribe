@@ -14,10 +14,20 @@ def load_speakers(speaker_file):
     return speakers
 
 def find_speaker_for_segment(segment, speakers):
+    max_overlap = 0
+    matched_speaker = "UNKNOWN"
+    
     for s in speakers:
-        if segment["start"] >= s["start"] and segment["end"] <= s["end"]:
-            return s["speaker"]
-    return "UNKNOWN"
+        overlap_start = max(segment["start"], s["start"])
+        overlap_end = min(segment["end"], s["end"])
+        overlap = max(0.0, overlap_end - overlap_start)
+
+        if overlap > max_overlap:
+            max_overlap = overlap
+            matched_speaker = s["speaker"]
+
+    return matched_speaker
+
 
 def combine_speakers_and_transcript(transcript_json, speaker_txt, output_dir, session_id):
     with open(transcript_json, "r", encoding="utf-8") as f:
